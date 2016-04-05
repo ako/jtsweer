@@ -27,7 +27,10 @@ class WeatherStore:
     
     def restoreDatastore(self):
         Logger.info("restoreDatastore")
-        self.datastore = pd.DataFrame().from_csv("observations.csv")
+        try:
+            self.datastore = pd.DataFrame().from_csv("observations.csv")
+        except Exception:
+            pass
         #self.datastore.reset_index().drop_duplicates(subset=['index','name'],take_last=True,inplace=True).set_index('index')
         #self.datastore.groupby([DF.index,)
         

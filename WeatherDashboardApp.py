@@ -11,45 +11,16 @@ from kivy.logger import Logger
 from kivy.clock import Clock
 from kivy.graphics.svg import Svg
 from time import gmtime, strftime
-from pygal.style import DarkStyle, DarkGreenBlueStyle
-from random import randint, random,sample
 from math import pi
 import matplotlib.pyplot as plt
 import numpy as np
-import pygal                                                       # First import pygal
+import pygal
 import requests
 import json
 import ConfigParser, os
 from WeatherStore import WeatherStore
 from WeatherDataImport import WeatherDataImport
-      
-class WindCharts:
-    def generateWindChart(self):
-        Logger.info("> generateWindChart " + strftime("%Y-%m-%d %H:%M:%S"))
-        plt.figure(figsize=[6,6])
-        x = np.arange(0,100,0.00001)
-        y = x*np.sin(2*pi*x)
-        plt.plot(y)
-        plt.axis('off')
-        plt.gca().set_position([0, 0, 1, 1])
-        Logger.info("  generateWindChart " + strftime("%Y-%m-%d %H:%M:%S"))
-        plt.savefig("test.png")
-        Logger.info("< generateWindChart" + strftime("%Y-%m-%d %H:%M:%S"))
-
-    def generateWindChartPygal(self):
-        Logger.info("> generateWindChartPygal " + strftime("%Y-%m-%d %H:%M:%S"))
-        bar_chart = pygal.Bar(style=DarkGreenBlueStyle)
-        bar_chart.add('Fibonacci', sample(xrange(100),10))
-        bar_chart.render_to_png('bar_chart.png')
-        Logger.info("< generateWindChartPygal " + strftime("%Y-%m-%d %H:%M:%S"))
-
-    def generateTempSparkline(self):
-        Logger.info("> generateTempSparkline " + strftime("%Y-%m-%d %H:%M:%S"))
-        bar_chart = pygal.Line(style=DarkGreenBlueStyle)
-        bar_chart.add('', sample(xrange(100),10))
-        bar_chart.render_sparkline()
-        bar_chart.render_to_png('temp_sparkline.png')
-        Logger.info("< generateWindChartPygal " + strftime("%Y-%m-%d %H:%M:%S"))
+from WeatherCharts import WeatherCharts
                  
 class TimeWidget(Widget):
     time = NumericProperty(42)
@@ -67,14 +38,20 @@ class WeatherDashboardApp(App):
     windKnt = NumericProperty(0)
     windDegrees = NumericProperty(0)
     
+    def refreshCharts(self,dt):
+        Logger.info("refreshCharts")
+        self.wc.generateWindChartPygal()
+        self.wc.generateTempSparkline()
+        
     def refreshDisplayValues(self,dt):
         Logger.info("refreshDisplayValues")
         self.windKph = int(self.ws.getLatestObservation("wind_kph"))
-        self.tempC = int(self.ws.getLatestObservation("temp_c"))
+        self.tempC = int(float(self.ws.getLatestObservation("temp_c")))
         self.windKnt = int(self.ws.getLatestObservation("wind_knt"))
         self.windDegrees = int(self.ws.getLatestObservation("wind_degrees"))
         self.tempFeel = "Voelt als {}".format(self.ws.getLatestObservation("feelslike_c"))
         self.Dew = "Dauwpunt {}".format(self.ws.getLatestObservation("dewpoint_c"))
+        self.tempSparkChart = "bar_chart.png"
         
     def __init__(self, **kwargs):
         super(WeatherDashboardApp,self).__init__(**kwargs)
@@ -84,6 +61,7 @@ class WeatherDashboardApp(App):
         self.ws = WeatherStore(config)
         self.ws.restoreDatastore()
         self.wdi = WeatherDataImport(self.ws,config)
+        self.wc = WeatherCharts(self.ws,config)
         Clock.schedule_interval(self.wdi.refreshGetij, 3600)
         Clock.schedule_interval(self.wdi.refreshScheveningenActueel, 300)
         Clock.schedule_interval(self.ws.dumpDatastore, 300)
@@ -91,7 +69,9 @@ class WeatherDashboardApp(App):
         self.wdi.refreshScheveningenActueel(0)
         self.ws.dumpDatastore(0)
         Clock.schedule_interval(self.refreshDisplayValues,5)
-        
+        Clock.schedule_interval(self.refreshCharts,60)
+        self.refreshCharts(0)
+                
     def build(self):
         return CurrentWeather()
         
@@ -101,13 +81,9 @@ class WeatherDashboardApp(App):
         
 class CurrentWeather(GridLayout):
     myTime = StringProperty(strftime("%Y-%m-%d %H:%M:%S"))
-    windKph = NumericProperty(-42)
 
     def refreshCharts(self,dt):
         Logger.info("refreshCharts: ")
-        windCharter = WindCharts()
-        windCharter.generateWindChartPygal()
-        windCharter.generateTempSparkline()
         self.ids.windChart.ids.image.reload()
 
     def setClock(self,dt):
@@ -118,9 +94,8 @@ class CurrentWeather(GridLayout):
         super(CurrentWeather,self).__init__(**kwargs)
         self.ids.tempTile.tileValue = "-1"
         Clock.schedule_interval(self.setClock, 1)
-        Clock.schedule_interval(self.refreshCharts, 60)
         self.setClock(0)
-        self.refreshCharts(0)
     
 if __name__ in ('__main__'):
-    WeatherDashboardApp().run()  
+    WeatherDashboardApp().run()
+    
