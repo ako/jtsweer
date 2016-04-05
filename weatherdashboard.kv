@@ -1,0 +1,122 @@
+<Chart@GridLayout>:
+    cols: 2
+    pngFile: "bar_char.png"
+    Image:
+        id: image
+        source: root.pngFile
+    
+<StatTile@GridLayout>:
+    cols: 2
+    tileValue: "value"
+    tileName: "name"
+    background_normal: ''
+    background_color: 100, 100, 100, 0.2
+    Label:
+        id: lbl1
+        text: root.tileValue
+        font_size: "96sp"
+        text_size: self.size
+        valign: "middle"
+        halign: "right"
+        background_normal: ''
+        background_color: 200, 200, 200, 0.9
+    Label:
+        id: lbl2
+        text: root.tileName
+        font_size: "18sp"
+        text_size: self.size
+        valign: "bottom"
+        halign: "left"
+        background_normal: ''
+        background_color: 0.1, 0.1, 0.1, 0.2
+
+<StatWithDetailsTile@GridLayout>:
+    cols: 2
+    tileValue: "value"
+    firstLabel: ""
+    secondLabel: ""
+    thirdLabel: ""
+    chart: ""
+    background_normal: ''
+    background_color: 100, 100, 100, 0.2
+    Label:
+        id: lbl1
+        text: root.tileValue
+        font_size: "128sp"
+        text_size: self.size
+        valign: "top"
+        halign: "left"
+        background_normal: ''
+        background_color: 200, 200, 200, 0.9
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: 10
+        Label:
+            size_hint: 1, .1
+            id: lbl2
+            text: root.firstLabel
+            font_size: "18sp"
+            text_size: self.size
+            valign: "bottom"
+            halign: "left"
+            background_normal: ''
+            background_color: 0.1, 0.1, 0.1, 0.2
+        Label:
+            size_hint: 1, .1
+            id: lbl2
+            text: root.secondLabel
+            font_size: "18sp"
+            text_size: self.size
+            valign: "bottom"
+            halign: "left"
+            background_normal: ''
+            background_color: 0.1, 0.1, 0.1, 0.2
+        Label:
+            size_hint: 1, .1
+            id: lbl2
+            text: root.thirdLabel
+            font_size: "18sp"
+            text_size: self.size
+            valign: "bottom"
+            halign: "left"
+            background_normal: ''
+            background_color: 0.1, 0.1, 0.1, 0.2
+        Chart:
+            size_hint: 1, .5
+            pngFile: root.chart
+                    
+<CurrentWeather>:
+    cols: 3
+    Label:
+        text: "helloWorld"
+    Button:
+        text: "Quit"
+        on_press: app.quitApp()
+    Button:
+        text: "Refresh"
+    StatWithDetailsTile:
+        id: tempTile
+        tileValue: str(app.tempC)
+        firstLabel: str(app.tempCLabel)
+        secondLabel: str(app.tempFeel)
+        thirdLabel: str(app.tempDew)
+        chart: str(app.tempSparkChart)        
+    StatTile:
+        id: windTile
+        tileValue: str(app.windKnt)
+        tileName: "Knt"
+    StatTile:
+        id: windDirectionTile
+        tileValue: str(app.windDegrees)
+        tileName: "Windrichting"
+    Chart:
+        id: windChart
+        pngFile: "bar_chart.png"
+    StatTile:
+        id: windTile2
+        tileValue: str(app.windKph)
+        tileName: "Kph"
+    Label:
+        text: root.myTime
+
+    
