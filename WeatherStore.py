@@ -12,8 +12,9 @@ class WeatherStore:
     def addObservation(self, timestamp, name, value):
         Logger.info("addObservation: {},{},{}".format(timestamp,name,value))
         if timestamp is not None:
-            observation = pd.DataFrame({'name':name,'value':value},index=[pd.Timestamp(timestamp)])
+            observation = pd.DataFrame({'name':name,'value':value},index=[pd.Timestamp(timestamp, tz='Europe/Amsterdam')])
             self.datastore = self.datastore.append(observation)
+            Logger.info("addObservation - timestamp: {}".format(observation))
         #self.logDatastore()
     
     def dumpDatastore(self,dt):
