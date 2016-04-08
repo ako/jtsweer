@@ -12,7 +12,7 @@ class WeatherStore:
     def addObservation(self, timestamp, name, value):
         Logger.info("addObservation: {},{},{}".format(timestamp,name,value))
         if timestamp is not None:
-            observation = pd.DataFrame({'name':name,'value':value},index=[pd.Timestamp(timestamp, tz='Europe/Amsterdam')])
+            observation = pd.DataFrame({'name':name,'value':value},index=[pd.Timestamp(timestamp, tz='CET')])
             self.datastore = self.datastore.append(observation)
             Logger.info("addObservation - timestamp: {}".format(observation))
         #self.logDatastore()
@@ -32,14 +32,16 @@ class WeatherStore:
             self.datastore = pd.DataFrame().from_csv("observations.csv")
         except Exception:
             pass
-        #self.datastore.reset_index().drop_duplicates(subset=['index','name'],take_last=True,inplace=True).set_index('index')
+        #self.datastore = self.datastore.groupby([self.datastore.index,'name'])
+        #self.loggerDataframe(self.datastore.reset_index())
+        #self.datastore.drop_duplicates(subset=[self.datastore.index,'name'],take_last=True,inplace=True).set_index('index')
         #self.datastore.groupby([DF.index,)
         
     def getLatestObservation(self,name):
         Logger.info("getLatestObservation {}".format(name))
         namedf = self.datastore.loc[self.datastore['name'] == name]
         self.loggerDataframe(namedf)
-        namedf = namedf.truncate(after=pd.to_datetime('now'))
+        namedf = namedf.truncate(after=pd.Timestamp.now('CET'))
         for index, row in namedf.iterrows():
             return row['value']        
 
