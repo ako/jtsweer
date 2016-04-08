@@ -1,3 +1,5 @@
+#:import C kivy.utils.get_color_from_hex 
+
 <Chart@GridLayout>:
     cols: 2
     pngFile: "bar_char.png"
@@ -6,7 +8,7 @@
         source: root.pngFile
     
 <StatTile@GridLayout>:
-    cols: 2
+    cols: 1
     tileValue: "value"
     tileName: "name"
     background_normal: ''
@@ -14,10 +16,10 @@
     Label:
         id: lbl1
         text: root.tileValue
-        font_size: "96sp"
+        font_size: "84sp"
         text_size: self.size
-        valign: "middle"
-        halign: "right"
+        valign: "top"
+        halign: "left"
         background_normal: ''
         background_color: 200, 200, 200, 0.9
     Label:
@@ -25,13 +27,13 @@
         text: root.tileName
         font_size: "18sp"
         text_size: self.size
-        valign: "bottom"
+        valign: "top"
         halign: "left"
         background_normal: ''
         background_color: 0.1, 0.1, 0.1, 0.2
 
 <StatWithDetailsTile@GridLayout>:
-    cols: 2
+    cols: 1
     tileValue: "value"
     firstLabel: ""
     secondLabel: ""
@@ -42,81 +44,94 @@
     Label:
         id: lbl1
         text: root.tileValue
-        font_size: "128sp"
+        font_size: "84sp"
         text_size: self.size
         valign: "top"
         halign: "left"
         background_normal: ''
         background_color: 200, 200, 200, 0.9
     BoxLayout:
-        orientation: 'vertical'
+        orientation: 'horizontal'
         spacing: 10
-        Label:
-            size_hint: 1, .1
-            id: lbl2
-            text: root.firstLabel
-            font_size: "18sp"
-            text_size: self.size
-            valign: "bottom"
-            halign: "left"
-            background_normal: ''
-            background_color: 0.1, 0.1, 0.1, 0.2
-        Label:
-            size_hint: 1, .1
-            id: lbl2
-            text: root.secondLabel
-            font_size: "18sp"
-            text_size: self.size
-            valign: "bottom"
-            halign: "left"
-            background_normal: ''
-            background_color: 0.1, 0.1, 0.1, 0.2
-        Label:
-            size_hint: 1, .1
-            id: lbl2
-            text: root.thirdLabel
-            font_size: "18sp"
-            text_size: self.size
-            valign: "bottom"
-            halign: "left"
-            background_normal: ''
-            background_color: 0.1, 0.1, 0.1, 0.2
+        BoxLayout:
+            orientation: 'vertical'
+            Label:
+                size_hint: 1, .1
+                id: lbl2
+                text: root.firstLabel
+                font_size: "18sp"
+                text_size: self.size
+                valign: "bottom"
+                halign: "left"
+                background_normal: ''
+                background_color: 0.1, 0.1, 0.1, 0.2
+            Label:
+                size_hint: 1, .1
+                id: lbl2
+                text: root.secondLabel
+                font_size: "18sp"
+                text_size: self.size
+                valign: "bottom"
+                halign: "left"
+                background_normal: ''
+                background_color: 0.1, 0.1, 0.1, 0.2
+            Label:
+                size_hint: 1, .1
+                id: lbl2
+                text: root.thirdLabel
+                font_size: "18sp"
+                text_size: self.size
+                valign: "bottom"
+                halign: "left"
+                background_normal: ''
+                background_color: 0.1, 0.1, 0.1, 0.2
         Chart:
             size_hint: 1, .5
             pngFile: root.chart
+
+<Button>:
+    background_normal: 'button_normal.png'
+    background_down: 'button_down.png'
+    background_color: C('#95A5A6')
+    font_size: 24
                     
-<CurrentWeather>:
-    cols: 3
-    Label:
-        text: "helloWorld"
-    Button:
-        text: "Quit"
-        on_press: app.quitApp()
-    Button:
-        text: "Refresh"
-    StatWithDetailsTile:
-        id: tempTile
-        tileValue: str(app.tempC)
-        firstLabel: str(app.tempCLabel)
-        secondLabel: str(app.tempFeel)
-        thirdLabel: str(app.tempDew)
-        chart: str(app.tempSparkChart)        
-    StatTile:
-        id: windTile
-        tileValue: str(app.windKnt)
-        tileName: "Knt"
-    StatTile:
-        id: windDirectionTile
-        tileValue: str(app.windDegrees)
-        tileName: "Windrichting"
-    Chart:
-        id: windChart
-        pngFile: "bar_chart.png"
-    StatTile:
-        id: windTile2
-        tileValue: str(app.windKph)
-        tileName: "Kph"
-    Label:
-        text: root.myTime
+<CurrentWeather@Boxlayout>:
+    orientation: 'vertical'
+    spacing: 10
+    GridLayout:
+        cols: 3
+        size_hint: 1, .1
+        Label:
+            text: root.myTime
+        Button:
+            text: "Quit"
+            on_press: app.quitApp()
+        Button:
+            text: "Refresh"
+    GridLayout:
+        cols: 3
+        size_hint: 1, .9
+        StatWithDetailsTile:
+            id: tempTile
+            tileValue: str(app.tempC)
+            firstLabel: str(app.tempCLabel)
+            secondLabel: str(app.tempFeel)
+            thirdLabel: str(app.tempDew)
+            chart: str(app.tempSparkChart)        
+        StatTile:
+            id: windTile
+            tileValue: str(app.windKnt)
+            tileName: "Knt"
+        StatTile:
+            id: windDirectionTile
+            tileValue: str(app.windDegrees)
+            tileName: "Windrichting"
+        Chart:
+            id: windChart
+            pngFile: "bar_chart.png"
+        StatTile:
+            id: windTile2
+            tileValue: str(app.windKph)
+            tileName: "Kph"
 
     

@@ -5,6 +5,7 @@ from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.widget import Widget
 from kivy.uix.gridlayout import GridLayout
+from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import NumericProperty
 from kivy.properties import StringProperty
 from kivy.logger import Logger
@@ -21,6 +22,7 @@ import ConfigParser, os
 from WeatherStore import WeatherStore
 from WeatherDataImport import WeatherDataImport
 from WeatherCharts import WeatherCharts
+from kivy.config import Config
                  
 class TimeWidget(Widget):
     time = NumericProperty(42)
@@ -56,6 +58,8 @@ class WeatherDashboardApp(App):
     def __init__(self, **kwargs):
         super(WeatherDashboardApp,self).__init__(**kwargs)
         Logger.info("WeatherDashboardApp")
+        Config.set('graphics', 'width', '800')
+        Config.set('graphics', 'height', '480')
         config = ConfigParser.ConfigParser()
         config.read([os.path.expanduser('~/.jtsweer.cfg')])
         self.ws = WeatherStore(config)
@@ -79,7 +83,7 @@ class WeatherDashboardApp(App):
         Logger.info("Quitting app")
         App.get_running_app().stop()        
         
-class CurrentWeather(GridLayout):
+class CurrentWeather(BoxLayout):
     myTime = StringProperty(strftime("%Y-%m-%d %H:%M:%S"))
 
     def refreshCharts(self,dt):
