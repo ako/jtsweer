@@ -3,12 +3,19 @@ import pandas as pd
 from pandas import DataFrame
 from StringIO import StringIO
 import os
+import sqlalchemy
+from sqlalchemy import create_engine
 
 class WeatherStore:
     def __init__(self,config):
         Logger.info("WeatherStore")
         self.datastore = pd.DataFrame()
         self.config = config
+        self.engine = create_engine('mysql://{0}:{1}@localhost/{2}'.\
+            format(self.config.get('Database','jtsdb_user'),\
+                   self.config.get('Database','jtsdb_password'),\
+                   self.config.get('Database','jtsdb_dbname')))
+ 
         
     def addObservation(self, timestamp, name, value):
         Logger.info("addObservation: {},{},{}".format(timestamp,name,value))
@@ -16,6 +23,7 @@ class WeatherStore:
             observation = pd.DataFrame({'name':name,'value':value},index=[pd.Timestamp(timestamp, tz='CET')])
             self.datastore = self.datastore.append(observation)
             Logger.info("addObservation - timestamp: {}".format(observation))
+#            observation.to_sql("observations",self.engine,flavor='mysql',if_exists='append')
         #self.logDatastore()
     
     def dumpDatastore(self,dt):
