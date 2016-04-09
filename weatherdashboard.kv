@@ -6,13 +6,25 @@
     Image:
         id: image
         source: root.pngFile
+        canvas.before: 
+            Color: 
+                rgb: C('#3498DB') 
+            Rectangle: 
+                pos: self.pos 
+                size: self.size
     
 <StatTile@GridLayout>:
     cols: 1
     tileValue: "value"
     tileName: "name"
-    background_normal: ''
-    background_color: 100, 100, 100, 0.2
+    bckclr: C('#3498DB') 
+    canvas.before: 
+        Color: 
+            rgb: C('#3498DB') 
+        Rectangle: 
+            pos: self.pos 
+            size: self.size
+    padding: 5 
     Label:
         id: lbl1
         text: root.tileValue
@@ -20,8 +32,6 @@
         text_size: self.size
         valign: "top"
         halign: "left"
-        background_normal: ''
-        background_color: 200, 200, 200, 0.9
     Label:
         id: lbl2
         text: root.tileName
@@ -29,10 +39,9 @@
         text_size: self.size
         valign: "top"
         halign: "left"
-        background_normal: ''
-        background_color: 0.1, 0.1, 0.1, 0.2
 
 <StatWithDetailsTile@GridLayout>:
+    padding: 5 
     cols: 1
     tileValue: "value"
     firstLabel: ""
@@ -40,22 +49,27 @@
     thirdLabel: ""
     chart: ""
     background_normal: ''
-    background_color: 100, 100, 100, 0.2
-    Label:
+    background_color: C('#16A085')
+    canvas.before: 
+        Color: 
+            rgb: .6, .6, .6 
+        Rectangle: 
+            pos: self.pos 
+            size: self.size
+    Button:
         id: lbl1
         text: root.tileValue
         font_size: "84sp"
         text_size: self.size
         valign: "top"
         halign: "left"
-        background_normal: ''
-        background_color: 200, 200, 200, 0.9
+        background_color: C('#16A085')
     BoxLayout:
         orientation: 'horizontal'
         spacing: 10
         BoxLayout:
             orientation: 'vertical'
-            Label:
+            Button:
                 size_hint: 1, .1
                 id: lbl2
                 text: root.firstLabel
@@ -63,9 +77,8 @@
                 text_size: self.size
                 valign: "bottom"
                 halign: "left"
-                background_normal: ''
-                background_color: 0.1, 0.1, 0.1, 0.2
-            Label:
+                background_color: C('#16A085')
+            Button:
                 size_hint: 1, .1
                 id: lbl2
                 text: root.secondLabel
@@ -73,9 +86,8 @@
                 text_size: self.size
                 valign: "bottom"
                 halign: "left"
-                background_normal: ''
-                background_color: 0.1, 0.1, 0.1, 0.2
-            Label:
+                background_color: C('#16A085')
+            Button:
                 size_hint: 1, .1
                 id: lbl2
                 text: root.thirdLabel
@@ -97,20 +109,25 @@
                     
 <CurrentWeather@Boxlayout>:
     orientation: 'vertical'
-    spacing: 10
+    spacing: 5
     GridLayout:
         cols: 3
         size_hint: 1, .1
-        Label:
+        spacing: 5
+        Button:
             text: root.myTime
+            background_color: C('#3498DB')
         Button:
             text: "Quit"
             on_press: app.quitApp()
+            background_color: C('#2ECC71')
         Button:
             text: "Refresh"
+            background_color: C('#1ABC9C')
     GridLayout:
         cols: 3
         size_hint: 1, .9
+        spacing: 5
         StatWithDetailsTile:
             id: tempTile
             tileValue: str(app.tempC)
@@ -118,10 +135,12 @@
             secondLabel: str(app.tempFeel)
             thirdLabel: str(app.tempDew)
             chart: str(app.tempSparkChart)        
+            background_color: C('#27AE60')
         StatTile:
             id: windTile
             tileValue: str(app.windKnt)
             tileName: "Knt"
+            background_color: C('#16A085')
         StatTile:
             id: windDirectionTile
             tileValue: str(app.windDegrees)
