@@ -4,6 +4,7 @@ from time import gmtime, strftime
 import pygal
 from pygal.style import DarkStyle, DarkGreenBlueStyle
 from random import randint, random,sample
+import os
 
 class WeatherCharts:
     def __init__(self,weatherStore,config):
@@ -27,7 +28,10 @@ class WeatherCharts:
         Logger.info("> generateWindChartPygal " + strftime("%Y-%m-%d %H:%M:%S"))
         bar_chart = pygal.Bar(style=DarkGreenBlueStyle)
         bar_chart.add('Fibonacci', sample(xrange(100),10))
-        bar_chart.render_to_png('bar_chart.png')
+        tmppath = self.config.get('Data','temppath')
+        chartfile =os.path.join(tmppath,'bar_chart.png')
+        Logger.info("writing chart to {0}".format(chartfile))
+        bar_chart.render_to_png(chartfile)
         Logger.info("< generateWindChartPygal " + strftime("%Y-%m-%d %H:%M:%S"))
 
     def generateTempSparkline(self):
@@ -35,5 +39,6 @@ class WeatherCharts:
         bar_chart = pygal.Line(style=DarkGreenBlueStyle)
         bar_chart.add('', sample(xrange(100),10))
         bar_chart.render_sparkline()
-        bar_chart.render_to_png('temp_sparkline.png')
+        tmppath = self.config.get('Data','temppath')
+        bar_chart.render_to_png(os.path.join(tmppath,'temp_sparkline.png'))
         Logger.info("< generateWindChartPygal " + strftime("%Y-%m-%d %H:%M:%S"))

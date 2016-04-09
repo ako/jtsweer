@@ -2,6 +2,7 @@ from kivy.logger import Logger
 import pandas as pd
 from pandas import DataFrame
 from StringIO import StringIO
+import os
 
 class WeatherStore:
     def __init__(self,config):
@@ -29,8 +30,10 @@ class WeatherStore:
     def restoreDatastore(self):
         Logger.info("restoreDatastore")
         try:
-            self.datastore = pd.DataFrame().from_csv("observations.csv")
-        except Exception:
+            tmppath = self.config.get('Data','temppath')
+            self.datastore = pd.DataFrame().from_csv(os.path.join(tmppath,"observations.csv"))
+        except Exception as e:
+            Logger.warn("Failed to read datastore: {0}".format(e.strerror))
             pass
         #self.datastore = self.datastore.groupby([self.datastore.index,'name'])
         #self.loggerDataframe(self.datastore.reset_index())
