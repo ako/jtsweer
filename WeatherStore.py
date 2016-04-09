@@ -12,7 +12,7 @@ class WeatherStore:
         
     def addObservation(self, timestamp, name, value):
         Logger.info("addObservation: {},{},{}".format(timestamp,name,value))
-        if timestamp is not None:
+        if timestamp is not None and timestamp is not '':
             observation = pd.DataFrame({'name':name,'value':value},index=[pd.Timestamp(timestamp, tz='CET')])
             self.datastore = self.datastore.append(observation)
             Logger.info("addObservation - timestamp: {}".format(observation))
@@ -25,13 +25,15 @@ class WeatherStore:
         # Logger.info(csvOut.getvalue())
         # csvOut.close()
         # Logger.info("count: {}".format(self.datastore.count()))
-        self.datastore.to_csv("observations.csv",header=['name','value'])
+        tmppath = self.config.get('Data','temppath')
+        self.datastore.to_csv(os.path.join(tmppath,"observations.csv"),header=['name','value'])
     
     def restoreDatastore(self):
         Logger.info("restoreDatastore")
         try:
             tmppath = self.config.get('Data','temppath')
             self.datastore = pd.DataFrame().from_csv(os.path.join(tmppath,"observations.csv"))
+            self.datastore =  self.datastore.sort().drop_duplicates()    
         except Exception as e:
             Logger.warn("Failed to read datastore: {0}".format(e.strerror))
             pass
@@ -42,11 +44,17 @@ class WeatherStore:
         
     def getLatestObservation(self,name):
         Logger.info("getLatestObservation {}".format(name))
-        namedf = self.datastore.loc[self.datastore['name'] == name]
-        self.loggerDataframe(namedf)
-        namedf = namedf.truncate(after=pd.Timestamp.now('CET'))
-        for index, row in namedf.iterrows():
-            return row['value']        
+        ds1 = self.datastore.sort().drop_duplicates()
+        val = ds1[ds1['name'] == name].sort(
+                ascending=[0]).truncate(
+                after=pd.Timestamp.now('CET')).sort(
+                ascending=False)[:1]
+        return val['value']
+        # namedf = self.datastore.loc[self.datastore['name'] == name]
+        # self.loggerDataframe(namedf)
+        # namedf = namedf.truncate(after=pd.Timestamp.now('CET'))
+        # for index, row in namedf.iterrows():
+        #     return row['value']        
 
     def loggerDataframe(self,dataframe):
         dfTxt = StringIO()
