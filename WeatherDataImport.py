@@ -9,7 +9,7 @@ import numpy as np
 from StringIO import StringIO
 from matplotlib.dates import strpdate2num
 import pandas as pd
-from exceptions import ValueError
+from exceptions import ValueError, AttributeError
 
 class WeatherDataImport:
     
@@ -41,8 +41,12 @@ class WeatherDataImport:
         dataFile.close()
         for index, row in df.iterrows():
             try:
-                self.ws.addObservation(row['timestamp'],'getij',float(row['height']))
+                self.ws.addObservation(pd.Timestamp(row['timestamp']).tz_localize('MET'),'getij',float(row['height']))
             except ValueError:
+                Logger.info("oops")
+                pass
+            except AttributeError:
+                Logger.info("oops")
                 pass
 
     def loggerDataframe(self,dataframe):
@@ -71,7 +75,7 @@ class WeatherDataImport:
         actWindDir = actResponse["current_observation"]["wind_dir"]        
         actWindDegrees = actResponse["current_observation"]["wind_degrees"]        
         actObservationTime = actResponse["current_observation"]["observation_time_rfc822"]
-        actObservationTime2 = parse(actObservationTime)
+        actObservationTime2 = pd.Timestamp(actObservationTime)
         actPrecipitation1hr = actResponse["current_observation"]["precip_1hr_metric"]
         actPrecipitationToday = actResponse["current_observation"]["precip_today_metric"]
         actPressureMb = actResponse["current_observation"]["pressure_mb"]
@@ -85,10 +89,10 @@ class WeatherDataImport:
         self.ws.addObservation(actObservationTime2,"wind_knt",actWindKnt)        
         self.ws.addObservation(actObservationTime2,"wind_gust_kph",actWindGustKph)        
         self.ws.addObservation(actObservationTime2,"wind_gust_knt",actWindGustKnt)        
-        self.ws.addObservation(actObservationTime2,"wind_dir",actWindDir)        
+        self.ws.addObservationString(actObservationTime2,"wind_dir",actWindDir)        
         self.ws.addObservation(actObservationTime2,"wind_degrees",actWindDegrees)        
         self.ws.addObservation(actObservationTime2,"precip_1hr_metric",actPrecipitation1hr)        
         self.ws.addObservation(actObservationTime2,"precip_today_metric",actPrecipitationToday)        
         self.ws.addObservation(actObservationTime2,"pressure_mb",actPressureMb)        
-        self.ws.addObservation(actObservationTime2,"relative_humidity",actRelativeHumidity)        
+        self.ws.addObservation(actObservationTime2,"relative_humidity",actRelativeHumidity.strip('%'))        
         self.ws.addObservation(actObservationTime2,"visibility_km",actVisibility)        

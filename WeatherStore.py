@@ -5,6 +5,8 @@ from StringIO import StringIO
 import os
 import sqlalchemy
 from sqlalchemy import create_engine
+from pytz import UTC
+from pytz import timezone
 
 class WeatherStore:
     def __init__(self,config):
@@ -15,15 +17,23 @@ class WeatherStore:
             format(self.config.get('Database','jtsdb_user'),\
                    self.config.get('Database','jtsdb_password'),\
                    self.config.get('Database','jtsdb_dbname')))
- 
         
     def addObservation(self, timestamp, name, value):
         Logger.info("addObservation: {},{},{}".format(timestamp,name,value))
         if timestamp is not None and timestamp is not '':
-            observation = pd.DataFrame({'name':name,'value':value},index=[pd.Timestamp(timestamp, tz='CET')])
+            observation = pd.DataFrame({'name':name,'valueNum':value,'valueString':None},index=[timestamp.tz_convert(None)])
             self.datastore = self.datastore.append(observation)
             Logger.info("addObservation - timestamp: {}".format(observation))
-#            observation.to_sql("observations",self.engine,flavor='mysql',if_exists='append')
+            observation.to_sql("observations",self.engine,flavor='mysql',if_exists='append',dtype={'index': sqlalchemy.types.DateTime})
+        #self.logDatastore()
+
+    def addObservationString(self, timestamp, name, value):
+        Logger.info("addObservationString: {},{},{}".format(timestamp,name,value))
+        if timestamp is not None and timestamp is not '':
+            observation = pd.DataFrame({'name':name,'valueNum':None,'valueString':value},index=[timestamp.tz_convert(None)])
+            self.datastore = self.datastore.append(observation)
+            Logger.info("addObservation - timestamp: {}".format(observation))
+            observation.to_sql("observations",self.engine,flavor='mysql',if_exists='append',dtype={'index': sqlalchemy.types.DateTime})
         #self.logDatastore()
     
     def dumpDatastore(self,dt):
@@ -34,7 +44,7 @@ class WeatherStore:
         # csvOut.close()
         # Logger.info("count: {}".format(self.datastore.count()))
         tmppath = self.config.get('Data','temppath')
-        self.datastore.to_csv(os.path.join(tmppath,"observations.csv"),header=['name','value'])
+        self.datastore.to_csv(os.path.join(tmppath,"observations.csv"),header=['name','valueNum','valueString'])
     
     def restoreDatastore(self):
         Logger.info("restoreDatastore")
@@ -51,18 +61,22 @@ class WeatherStore:
         #self.datastore.groupby([DF.index,)
         
     def getLatestObservation(self,name):
-        Logger.info("getLatestObservation {}".format(name))
+        Logger.debug("getLatestObservation {}".format(name))
         ds1 = self.datastore.sort().drop_duplicates()
         val = ds1[ds1['name'] == name].sort(
                 ascending=[0]).truncate(
                 after=pd.Timestamp.now('CET')).sort(
                 ascending=False)[:1]
-        return val['value']
-        # namedf = self.datastore.loc[self.datastore['name'] == name]
-        # self.loggerDataframe(namedf)
-        # namedf = namedf.truncate(after=pd.Timestamp.now('CET'))
-        # for index, row in namedf.iterrows():
-        #     return row['value']        
+        return val['valueNum']
+
+    def getLatestObservationString(self,name):
+        Logger.debug("getLatestObservation {}".format(name))
+        ds1 = self.datastore.sort().drop_duplicates()
+        val = ds1[ds1['name'] == name].sort(
+                ascending=[0]).truncate(
+                after=pd.Timestamp.now('CET')).sort(
+                ascending=False)[:1]
+        return val['valueString']
 
     def loggerDataframe(self,dataframe):
         dfTxt = StringIO()

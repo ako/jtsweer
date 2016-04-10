@@ -1,4 +1,6 @@
 #:import C kivy.utils.get_color_from_hex 
+#:set my_color (.4, .3, .4)
+#:set my_color_hl (.5, .4, .5)
 
 <Chart@GridLayout>:
     cols: 2
@@ -48,28 +50,27 @@
     secondLabel: ""
     thirdLabel: ""
     chart: ""
-    background_normal: ''
-    background_color: C('#16A085')
+    tileColor: '#16A085'
+    state: 'normal'
     canvas.before: 
         Color: 
-            rgb: .6, .6, .6 
+            rgb: C(self.tileColor)
         Rectangle: 
             pos: self.pos 
             size: self.size
-    Button:
+    Label:
         id: lbl1
         text: root.tileValue
         font_size: "84sp"
         text_size: self.size
         valign: "top"
         halign: "left"
-        background_color: C('#16A085')
     BoxLayout:
         orientation: 'horizontal'
         spacing: 10
         BoxLayout:
             orientation: 'vertical'
-            Button:
+            Label:
                 size_hint: 1, .1
                 id: lbl2
                 text: root.firstLabel
@@ -77,8 +78,7 @@
                 text_size: self.size
                 valign: "bottom"
                 halign: "left"
-                background_color: C('#16A085')
-            Button:
+            Label:
                 size_hint: 1, .1
                 id: lbl2
                 text: root.secondLabel
@@ -86,8 +86,7 @@
                 text_size: self.size
                 valign: "bottom"
                 halign: "left"
-                background_color: C('#16A085')
-            Button:
+            Label:
                 size_hint: 1, .1
                 id: lbl2
                 text: root.thirdLabel
@@ -95,8 +94,6 @@
                 text_size: self.size
                 valign: "bottom"
                 halign: "left"
-                background_normal: ''
-                background_color: 0.1, 0.1, 0.1, 0.2
         Chart:
             size_hint: 1, .5
             pngFile: root.chart
@@ -132,15 +129,17 @@
             id: tempTile
             tileValue: str(app.tempC)
             firstLabel: str(app.tempCLabel)
-            secondLabel: str(app.tempFeel)
-            thirdLabel: str(app.tempDew)
+            secondLabel: "Voelt als " + str(app.tempFeel)
+            thirdLabel: "Dauwpunt " + str(app.tempDew)
             chart: str(app.tempSparkChart)        
-            background_color: C('#27AE60')
-        StatTile:
+            tileColor: '#16A085'
+        StatWithDetailsTile:
             id: windTile
             tileValue: str(app.windKnt)
-            tileName: "Knt"
-            background_color: C('#16A085')
+            firstLabel: "Knopen"
+            secondLabel: str(app.windKph) + " km/h"
+            thirdLabel: "Vlagen max: " + str(app.windGustKnt)
+            tileColor: '#1ABC9C'
         StatTile:
             id: windDirectionTile
             tileValue: str(app.windDegrees)
@@ -148,9 +147,5 @@
         Chart:
             id: windChart
             pngFile: "bar_chart.png"
-        StatTile:
-            id: windTile2
-            tileValue: str(app.windKph)
-            tileName: "Kph"
 
     

@@ -10,6 +10,7 @@ Weather dashboard for Raspberry pi.
  * sudo pip install pygal
  * sudo pip install matplotlib
  * sudo pip install cairosvg
+ * sudo pip install mysqlclient
  
 ## Kiosk mode
 
@@ -21,4 +22,5 @@ Weather dashboard for Raspberry pi.
  [1]: http://askubuntu.com/questions/490820/how-to-make-ubuntu-14-04-a-kiosk
  [2]: https://www.danpurdy.co.uk/web-development/raspberry-pi-kiosk-screen-tutorial/
  [3]: http://kivypie.mitako.eu/kivy-faq.html
+ [4]: http://elinux.org/RPiconfig
  

@@ -34,12 +34,13 @@ class WeatherDashboardApp(App):
     windKph = NumericProperty(0)
     tempC = NumericProperty(0)
     tempCLabel = StringProperty("Graden celcius")
-    tempFeel = StringProperty("Gevoelstemperatuur: -1C")
-    tempDew = StringProperty("Dauwpunt: 2C")
+    tempFeel = NumericProperty(-1)
+    tempDew = NumericProperty(-1)
     tempSparkChart = StringProperty("bar_chart.png")
     windKnt = NumericProperty(0)
     windDegrees = NumericProperty(0)
-    
+    windGustKnt = NumericProperty(0)
+    tileColor = StringProperty()
     def refreshCharts(self,dt):
         Logger.info("refreshCharts")
         self.wc.generateWindChartPygal()
@@ -51,8 +52,9 @@ class WeatherDashboardApp(App):
         self.tempC = int(float(self.ws.getLatestObservation("temp_c")))
         self.windKnt = int(self.ws.getLatestObservation("wind_knt"))
         self.windDegrees = int(self.ws.getLatestObservation("wind_degrees"))
-        self.tempFeel = "Voelt als {}".format(self.ws.getLatestObservation("feelslike_c"))
-        self.Dew = "Dauwpunt {}".format(self.ws.getLatestObservation("dewpoint_c"))
+        self.tempFeel = int(self.ws.getLatestObservation("feelslike_c"))
+        self.tempDew = int(self.ws.getLatestObservation("dewpoint_c"))
+        self.windGustKnt = int(self.ws.getLatestObservation("wind_gust_knt"))
         self.tempSparkChart = "bar_chart.png"
         
     def __init__(self, **kwargs):
@@ -91,7 +93,7 @@ class CurrentWeather(BoxLayout):
         self.ids.windChart.ids.image.reload()
 
     def setClock(self,dt):
-        Logger.info("setClock: ")
+        Logger.debug("setClock: ")
         self.myTime = strftime("%Y-%m-%d %H:%M:%S")
     
     def __init__(self, **kwargs):
