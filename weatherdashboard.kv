@@ -49,6 +49,7 @@
     firstLabel: ""
     secondLabel: ""
     thirdLabel: ""
+    fourthLabel: ""
     chart: ""
     tileColor: '#16A085'
     state: 'normal'
@@ -65,6 +66,7 @@
         text_size: self.size
         valign: "top"
         halign: "left"
+        markup: True
     BoxLayout:
         orientation: 'horizontal'
         spacing: 10
@@ -78,6 +80,7 @@
                 text_size: self.size
                 valign: "bottom"
                 halign: "left"
+                markup: True
             Label:
                 size_hint: 1, .1
                 id: lbl2
@@ -86,6 +89,7 @@
                 text_size: self.size
                 valign: "bottom"
                 halign: "left"
+                markup: True
             Label:
                 size_hint: 1, .1
                 id: lbl2
@@ -94,6 +98,16 @@
                 text_size: self.size
                 valign: "bottom"
                 halign: "left"
+                markup: True
+            Label:
+                size_hint: 1, .1
+                id: lbl2
+                text: root.fourthLabel
+                font_size: "18sp"
+                text_size: self.size
+                valign: "bottom"
+                halign: "left"
+                markup: True
         Chart:
             size_hint: 1, .5
             pngFile: root.chart
@@ -127,25 +141,28 @@
         spacing: 5
         StatWithDetailsTile:
             id: tempTile
-            tileValue: str(app.tempC)
-            firstLabel: str(app.tempCLabel)
-            secondLabel: "Voelt als " + str(app.tempFeel)
-            thirdLabel: "Dauwpunt " + str(app.tempDew)
+            tileValue: str(app.tempC) + "[sup]ºC[/sup]"
+            firstLabel: "Voelt als " + str(app.tempFeel) + "[sup]ºC[/sup]"
+            secondLabel: "Dauwpunt " + str(app.tempDew) + "[sup]ºC[/sup]"
+            thirdLabel: "Humidity " + str(app.humidity) + "%"
+            fourthLabel: "Luchtdruk"
             chart: str(app.tempSparkChart)        
             tileColor: '#16A085'
         StatWithDetailsTile:
             id: windTile
-            tileValue: str(app.windKnt)
-            firstLabel: "Knopen"
+            tileValue: str(app.windKnt) + "[sup]Knp[/sup]"
+            firstLabel: "Vlagen max: " + str(app.windGustKnt)
             secondLabel: str(app.windKph) + " km/h"
-            thirdLabel: "Vlagen max: " + str(app.windGustKnt)
+            thirdLabel: "Knopen"
+            fourthLabel: "Zicht"
             tileColor: '#1ABC9C'
+            chart: str(app.tempSparkChart)        
         StatTile:
             id: windDirectionTile
             tileValue: str(app.windDegrees)
             tileName: "Windrichting"
         Chart:
             id: windChart
-            pngFile: "bar_chart.png"
+            pngFile: str(app.summaryChart)
 
     

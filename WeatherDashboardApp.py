@@ -12,7 +12,7 @@ from kivy.logger import Logger
 from kivy.clock import Clock
 from kivy.graphics.svg import Svg
 from time import gmtime, strftime
-from math import pi
+from math import pi, isnan
 import matplotlib.pyplot as plt
 import numpy as np
 import pygal
@@ -37,10 +37,13 @@ class WeatherDashboardApp(App):
     tempFeel = NumericProperty(-1)
     tempDew = NumericProperty(-1)
     tempSparkChart = StringProperty("bar_chart.png")
+    summaryChart = StringProperty("")
     windKnt = NumericProperty(0)
     windDegrees = NumericProperty(0)
     windGustKnt = NumericProperty(0)
+    humidity = NumericProperty(0)
     tileColor = StringProperty()
+    
     def refreshCharts(self,dt):
         Logger.info("refreshCharts")
         self.wc.generateWindChartPygal()
@@ -49,25 +52,31 @@ class WeatherDashboardApp(App):
     def refreshDisplayValues(self,dt):
         Logger.info("refreshDisplayValues")
         self.windKph = int(self.ws.getLatestObservation("wind_kph"))
-        self.tempC = int(float(self.ws.getLatestObservation("temp_c")))
-        self.windKnt = int(self.ws.getLatestObservation("wind_knt"))
-        self.windDegrees = int(self.ws.getLatestObservation("wind_degrees"))
-        self.tempFeel = int(self.ws.getLatestObservation("feelslike_c"))
+        self.tempC = int(float(self.ws.getLatestObservation("temp_c") if not isnan(self.ws.getLatestObservation("temp_c")) else 0))
+        self.windKnt = int(self.ws.getLatestObservation("wind_knt") if not not isnan(self.ws.getLatestObservation("wind_knt")) else 0)
+        self.windDegrees = int(float(self.ws.getLatestObservation("wind_degrees")) if not isnan(self.ws.getLatestObservation("wind_degrees")) else 0)
+        self.tempFeel = int(float(self.ws.getLatestObservation("feelslike_c")))
         self.tempDew = int(self.ws.getLatestObservation("dewpoint_c"))
         self.windGustKnt = int(self.ws.getLatestObservation("wind_gust_knt"))
-        self.tempSparkChart = "bar_chart.png"
+        self.humidity = int(self.ws.getLatestObservation("relative_humidity"))
+        #tmppath = self.config.get('Data','temppath')
+        tmppath = "/temp"
+        self.summaryChart = ""
+        self.tempSparkChart = ""
+        self.summaryChart = os.path.join(tmppath,'bar_chart.png')
+        self.tempSparkChart = os.path.join(tmppath,"temp_sparkline.png")
         
     def __init__(self, **kwargs):
         super(WeatherDashboardApp,self).__init__(**kwargs)
         Logger.info("WeatherDashboardApp")
         Config.set('graphics', 'width', '800')
         Config.set('graphics', 'height', '480')
-        config = ConfigParser.ConfigParser()
-        config.read([os.path.expanduser('~/.jtsweer.cfg')])
-        self.ws = WeatherStore(config)
+        self.config = ConfigParser.ConfigParser()
+        self.config.read([os.path.expanduser('~/.jtsweer.cfg')])
+        self.ws = WeatherStore(self.config)
         self.ws.restoreDatastore()
-        self.wdi = WeatherDataImport(self.ws,config)
-        self.wc = WeatherCharts(self.ws,config)
+        self.wdi = WeatherDataImport(self.ws,self.config)
+        self.wc = WeatherCharts(self.ws,self.config)
         Clock.schedule_interval(self.wdi.refreshGetij, 3600)
         Clock.schedule_interval(self.wdi.refreshScheveningenActueel, 300)
         Clock.schedule_interval(self.ws.dumpDatastore, 300)

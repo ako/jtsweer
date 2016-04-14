@@ -41,7 +41,7 @@ class WeatherDataImport:
         dataFile.close()
         for index, row in df.iterrows():
             try:
-                self.ws.addObservation(pd.Timestamp(row['timestamp']).tz_localize('MET'),'getij',float(row['height']))
+                self.ws.addObservation(pd.Timestamp(row['timestamp']).tz_localize('MET'),'getij',float(row['height']),'getij.rws.nl')
             except ValueError:
                 Logger.info("oops")
                 pass
@@ -81,18 +81,18 @@ class WeatherDataImport:
         actPressureMb = actResponse["current_observation"]["pressure_mb"]
         actRelativeHumidity = actResponse["current_observation"]["relative_humidity"]
         actVisibility = actResponse["current_observation"]["visibility_km"]
-        self.ws.addObservation(actObservationTime2,"temp_c",actTempC)        
-        self.ws.addObservation(actObservationTime2,"dewpoint_c",actDewpointC)        
-        self.ws.addObservation(actObservationTime2,"feelslike_c",actFeelslikeC)        
-        self.ws.addObservation(actObservationTime2,"windchill_c",actWindchillC)        
-        self.ws.addObservation(actObservationTime2,"wind_kph",actWindKph)        
-        self.ws.addObservation(actObservationTime2,"wind_knt",actWindKnt)        
-        self.ws.addObservation(actObservationTime2,"wind_gust_kph",actWindGustKph)        
-        self.ws.addObservation(actObservationTime2,"wind_gust_knt",actWindGustKnt)        
-        self.ws.addObservationString(actObservationTime2,"wind_dir",actWindDir)        
-        self.ws.addObservation(actObservationTime2,"wind_degrees",actWindDegrees)        
-        self.ws.addObservation(actObservationTime2,"precip_1hr_metric",actPrecipitation1hr)        
-        self.ws.addObservation(actObservationTime2,"precip_today_metric",actPrecipitationToday)        
-        self.ws.addObservation(actObservationTime2,"pressure_mb",actPressureMb)        
-        self.ws.addObservation(actObservationTime2,"relative_humidity",actRelativeHumidity.strip('%'))        
-        self.ws.addObservation(actObservationTime2,"visibility_km",actVisibility)        
+        self.ws.addObservation(actObservationTime2,"temp_c",actTempC,"weatherunderground_the_hague")        
+        self.ws.addObservation(actObservationTime2,"dewpoint_c",actDewpointC,"weatherunderground_the_hague")        
+        self.ws.addObservation(actObservationTime2,"feelslike_c",actFeelslikeC,"weatherunderground_the_hague")        
+        self.ws.addObservation(actObservationTime2,"windchill_c",actWindchillC,"weatherunderground_the_hague")        
+        self.ws.addObservation(actObservationTime2,"wind_kph",actWindKph,"weatherunderground_the_hague")        
+        self.ws.addObservation(actObservationTime2,"wind_knt",actWindKnt,"weatherunderground_the_hague")        
+        self.ws.addObservation(actObservationTime2,"wind_gust_kph",actWindGustKph,"weatherunderground_the_hague")        
+        self.ws.addObservation(actObservationTime2,"wind_gust_knt",actWindGustKnt,"weatherunderground_the_hague")        
+        self.ws.addObservationString(actObservationTime2,"wind_dir",actWindDir,"weatherunderground_the_hague")        
+        self.ws.addObservation(actObservationTime2,"wind_degrees",actWindDegrees,"weatherunderground_the_hague")        
+        self.ws.addObservation(actObservationTime2,"precip_1hr_metric",actPrecipitation1hr,"weatherunderground_the_hague")        
+        self.ws.addObservation(actObservationTime2,"precip_today_metric",actPrecipitationToday,"weatherunderground_the_hague")        
+        self.ws.addObservation(actObservationTime2,"pressure_mb",actPressureMb,"weatherunderground_the_hague")        
+        self.ws.addObservation(actObservationTime2,"relative_humidity",actRelativeHumidity.strip('%'),"weatherunderground_the_hague")        
+        self.ws.addObservation(actObservationTime2,"visibility_km",actVisibility,"weatherunderground_the_hague")        

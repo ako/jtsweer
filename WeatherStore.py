@@ -4,79 +4,90 @@ from pandas import DataFrame
 from StringIO import StringIO
 import os
 import sqlalchemy
-from sqlalchemy import create_engine
-from pytz import UTC
-from pytz import timezone
-
+from sqlalchemy import create_engine, desc
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.sql import select, and_
+from pytz import UTC, timezone
+from sqlalchemy import PrimaryKeyConstraint
+from sqlalchemy import Table, Column, Numeric, DateTime, String, MetaData
+from math import pi, isnan
+from decimal import Decimal
+ 
 class WeatherStore:
     def __init__(self,config):
         Logger.info("WeatherStore")
-        self.datastore = pd.DataFrame()
+        #self.datastore = pd.DataFrame()
         self.config = config
         self.engine = create_engine('mysql://{0}:{1}@localhost/{2}'.\
             format(self.config.get('Database','jtsdb_user'),\
                    self.config.get('Database','jtsdb_password'),\
-                   self.config.get('Database','jtsdb_dbname')))
+                   self.config.get('Database','jtsdb_dbname')),echo=True)
+        self.metadata = MetaData()
+        self.observations = Table('observations',self.metadata,
+                Column('timestamp',DateTime,nullable=False),
+                Column('name',String(50),nullable=False),
+                Column('source',String(50),nullable=False),
+                Column('valueNum',Numeric(10,2),nullable=True),
+                Column('valueString',String(50),nullable=True),
+                PrimaryKeyConstraint('timestamp', 'name', name='mytable_pk')
+            )
+        self.metadata.create_all(self.engine)
         
-    def addObservation(self, timestamp, name, value):
+    def addObservation(self, timestamp, name, value, source):
         Logger.info("addObservation: {},{},{}".format(timestamp,name,value))
         if timestamp is not None and timestamp is not '':
-            observation = pd.DataFrame({'name':name,'valueNum':value,'valueString':None},index=[timestamp.tz_convert(None)])
-            self.datastore = self.datastore.append(observation)
-            Logger.info("addObservation - timestamp: {}".format(observation))
-            observation.to_sql("observations",self.engine,flavor='mysql',if_exists='append',dtype={'index': sqlalchemy.types.DateTime})
+            conn = self.engine.connect()
+            try:
+                Logger.info("value = >{}<".format(value) )
+                if value in ("NA","--") :
+                    val = Decimal()
+                else:
+                    val = Decimal(value)
+                obsInsert = self.observations.insert().values(timestamp=timestamp.tz_convert(None),name=name,source=source,valueNum=val,valueString=None)
+                result = conn.execute(obsInsert)
+            except SQLAlchemyError as e:
+                Logger.warn("Error {}".format(e))
+                pass
         #self.logDatastore()
 
-    def addObservationString(self, timestamp, name, value):
+    def addObservationString(self, timestamp, name, value, source):
         Logger.info("addObservationString: {},{},{}".format(timestamp,name,value))
         if timestamp is not None and timestamp is not '':
-            observation = pd.DataFrame({'name':name,'valueNum':None,'valueString':value},index=[timestamp.tz_convert(None)])
-            self.datastore = self.datastore.append(observation)
-            Logger.info("addObservation - timestamp: {}".format(observation))
-            observation.to_sql("observations",self.engine,flavor='mysql',if_exists='append',dtype={'index': sqlalchemy.types.DateTime})
-        #self.logDatastore()
+            conn = self.engine.connect()
+            try:
+                obsInsert = self.observations.insert().values(timestamp=timestamp.tz_convert(None),name=name,source=source,valueNum=None,valueString=value)
+                result = conn.execute(obsInsert)
+            except SQLAlchemyError as e:
+                Logger.warn("Error {}".format(e))
+                pass
     
     def dumpDatastore(self,dt):
         Logger.info("dumpDatastore")
-        # csvOut = StringIO()
-        # self.datastore.tail(10).to_csv(csvOut)
-        # Logger.info(csvOut.getvalue())
-        # csvOut.close()
-        # Logger.info("count: {}".format(self.datastore.count()))
-        tmppath = self.config.get('Data','temppath')
-        self.datastore.to_csv(os.path.join(tmppath,"observations.csv"),header=['name','valueNum','valueString'])
     
     def restoreDatastore(self):
         Logger.info("restoreDatastore")
-        try:
-            tmppath = self.config.get('Data','temppath')
-            self.datastore = pd.DataFrame().from_csv(os.path.join(tmppath,"observations.csv"))
-            self.datastore =  self.datastore.sort().drop_duplicates()    
-        except Exception as e:
-            Logger.warn("Failed to read datastore: {0}".format(e.strerror))
-            pass
-        #self.datastore = self.datastore.groupby([self.datastore.index,'name'])
-        #self.loggerDataframe(self.datastore.reset_index())
-        #self.datastore.drop_duplicates(subset=[self.datastore.index,'name'],take_last=True,inplace=True).set_index('index')
-        #self.datastore.groupby([DF.index,)
-        
+       
     def getLatestObservation(self,name):
-        Logger.debug("getLatestObservation {}".format(name))
-        ds1 = self.datastore.sort().drop_duplicates()
-        val = ds1[ds1['name'] == name].sort(
-                ascending=[0]).truncate(
-                after=pd.Timestamp.now('CET')).sort(
-                ascending=False)[:1]
-        return val['valueNum']
+        Logger.info("getLatestObservation {}".format(name))
+        conn = self.engine.connect()
+        s = select([self.observations.c.valueNum]).\
+            where(and_(self.observations.c.name == name,self.observations.c.timestamp <= pd.Timestamp.now('CET').tz_convert(None))).\
+            order_by(desc(self.observations.c.timestamp))
+        result = conn.execute(s)
+        row = result.fetchone()
+        result.close()
+        return row['valueNum']
 
     def getLatestObservationString(self,name):
         Logger.debug("getLatestObservation {}".format(name))
-        ds1 = self.datastore.sort().drop_duplicates()
-        val = ds1[ds1['name'] == name].sort(
-                ascending=[0]).truncate(
-                after=pd.Timestamp.now('CET')).sort(
-                ascending=False)[:1]
-        return val['valueString']
+        conn = self.engine.connect()
+        s = select([self.observations.c.valueString]).\
+            where(and_(self.observations.c.name == name,self.observations.c.timestamp <= pd.Timestamp.now('CET').tz_convert(None))).\
+            order_by(desc(self.observations.c.timestamp))
+        result = conn.execute(s)
+        row = result.fetchone()
+        result.close()
+        return row['valueString']
 
     def loggerDataframe(self,dataframe):
         dfTxt = StringIO()
