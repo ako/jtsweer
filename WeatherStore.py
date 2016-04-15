@@ -39,7 +39,7 @@ class WeatherStore:
             conn = self.engine.connect()
             try:
                 Logger.info("value = >{}<".format(value) )
-                if value in ("NA","--") :
+                if value in ("NA","--","N/A") :
                     val = Decimal()
                 else:
                     val = Decimal(value)
