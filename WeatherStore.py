@@ -9,7 +9,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.sql import select, and_
 from pytz import UTC, timezone
 from sqlalchemy import PrimaryKeyConstraint
-from sqlalchemy import Table, Column, Numeric, DateTime, String, MetaData
+from sqlalchemy import Table, Column, Numeric, DateTime, String, MetaData, Boolean
 from math import pi, isnan
 from decimal import Decimal
  
@@ -29,6 +29,7 @@ class WeatherStore:
                 Column('source',String(50),nullable=False),
                 Column('valueNum',Numeric(10,2),nullable=True),
                 Column('valueString',String(50),nullable=True),
+                Column('isForecast',Boolean,nullable=True),
                 PrimaryKeyConstraint('timestamp', 'name', name='mytable_pk')
             )
         self.metadata.create_all(self.engine)
@@ -43,7 +44,7 @@ class WeatherStore:
                     val = Decimal()
                 else:
                     val = Decimal(value)
-                obsInsert = self.observations.insert().values(timestamp=timestamp.tz_convert(None),name=name,source=source,valueNum=val,valueString=None)
+                obsInsert = self.observations.insert().values(timestamp=timestamp.tz_convert(None),name=name,source=source,valueNum=val,valueString=None,isForecast=False)
                 result = conn.execute(obsInsert)
             except SQLAlchemyError as e:
                 Logger.warn("Error {}".format(e))
@@ -55,7 +56,7 @@ class WeatherStore:
         if timestamp is not None and timestamp is not '':
             conn = self.engine.connect()
             try:
-                obsInsert = self.observations.insert().values(timestamp=timestamp.tz_convert(None),name=name,source=source,valueNum=None,valueString=value)
+                obsInsert = self.observations.insert().values(timestamp=timestamp.tz_convert(None),name=name,source=source,valueNum=None,valueString=value,isForecast=False)
                 result = conn.execute(obsInsert)
             except SQLAlchemyError as e:
                 Logger.warn("Error {}".format(e))
@@ -71,7 +72,7 @@ class WeatherStore:
         Logger.info("getLatestObservation {}".format(name))
         conn = self.engine.connect()
         s = select([self.observations.c.valueNum]).\
-            where(and_(self.observations.c.name == name,self.observations.c.timestamp <= pd.Timestamp.now('CET').tz_convert(None))).\
+            where(and_(self.observations.c.name == name,self.observations.c.timestamp <= pd.Timestamp.now('CET').tz_convert(None),self.observations.c.isForecast == False)).\
             order_by(desc(self.observations.c.timestamp))
         result = conn.execute(s)
         row = result.fetchone()
@@ -82,7 +83,7 @@ class WeatherStore:
         Logger.debug("getLatestObservation {}".format(name))
         conn = self.engine.connect()
         s = select([self.observations.c.valueString]).\
-            where(and_(self.observations.c.name == name,self.observations.c.timestamp <= pd.Timestamp.now('CET').tz_convert(None))).\
+            where(and_(self.observations.c.name == name,self.observations.c.timestamp <= pd.Timestamp.now('CET').tz_convert(None),self.observations.c.isForecast == False)).\
             order_by(desc(self.observations.c.timestamp))
         result = conn.execute(s)
         row = result.fetchone()

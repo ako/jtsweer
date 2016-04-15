@@ -59,14 +59,20 @@
         Rectangle: 
             pos: self.pos 
             size: self.size
-    Label:
-        id: lbl1
-        text: root.tileValue
-        font_size: "84sp"
-        text_size: self.size
-        valign: "top"
-        halign: "left"
-        markup: True
+    BoxLayout:
+        orientation: 'horizontal'
+        Label:
+            id: lbl1
+            text: root.tileValue
+            font_size: "84sp"
+            text_size: self.size
+            valign: "top"
+            halign: "left"
+            markup: True
+        Label:
+            font_name: "fonts/iconvault_forecastfont.ttf"
+            text: u'\uf106'
+            font_size: "64sp"
     BoxLayout:
         orientation: 'horizontal'
         spacing: 10

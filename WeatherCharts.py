@@ -8,7 +8,7 @@ import os
 
 class WeatherCharts:
     def __init__(self,weatherStore,config):
-        Logger.info("WeatherCharts")
+        Logger.info("WeatherCharts: {}".format(config))
         self.ws = weatherStore
         self.config = config
         
@@ -28,7 +28,7 @@ class WeatherCharts:
         Logger.info("> generateWindChartPygal " + strftime("%Y-%m-%d %H:%M:%S"))
         bar_chart = pygal.Bar(style=DarkGreenBlueStyle)
         bar_chart.add('Fibonacci', sample(xrange(100),10))
-        tmppath = self.config.get('Data','temppath')
+        tmppath = self.config.get('General','temppath')
         chartfile =os.path.join(tmppath,'bar_chart.png')
         Logger.info("writing chart to {0}".format(chartfile))
         bar_chart.render_to_png(chartfile)
@@ -39,6 +39,6 @@ class WeatherCharts:
         bar_chart = pygal.Line(style=DarkGreenBlueStyle)
         bar_chart.add('', sample(xrange(100),10))
         bar_chart.render_sparkline()
-        tmppath = self.config.get('Data','temppath')
+        tmppath = self.config.get('General','temppath')
         bar_chart.render_to_png(os.path.join(tmppath,'temp_sparkline.png'))
         Logger.info("< generateWindChartPygal " + strftime("%Y-%m-%d %H:%M:%S"))

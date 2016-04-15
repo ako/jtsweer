@@ -55,13 +55,47 @@ class WeatherDataImport:
         Logger.info(dfTxt.getvalue())
         dfTxt.close()
 
+    def refreshOpenWeatherMap(self,dt):
+        Logger.info("refreshOpenWeatherMap")
+        owmKey = self.config.get('OpenWeatherMap','key')
+        owmLongitude = self.config.get('OpenWeatherMap','longitude')
+        owmLatitude = self.config.get('OpenWeatherMap','latitude')
+        #
+        # Get current weather
+        #
+        r = requests.get("http://api.openweathermap.org/data/2.5/weather?lon={}&lat={}&appid={}&units=metric".format(owmLongitude,owmLatitude,owmKey))
+        actResponse = json.loads(r.text)
+        print(json.dumps(actResponse,indent=4,sort_keys=True))
+        source = "owm_the_hague"
+        tempC = actResponse["main"]["temp"]
+        observationTime = pd.to_datetime(actResponse["dt"],unit='s').tz_localize('utc')
+        actWindMs = int(actResponse["wind"]["speed"])
+        actWindKnt = int(actWindMs * 1.9438445)
+        actWindDegrees = int(actResponse["wind"]["deg"])
+        actPressure = int(actResponse["main"]["pressure"])
+        actHumidity = int(actResponse["main"]["humidity"])
+        self.ws.addObservation(observationTime,"temp_c",tempC,source)        
+        self.ws.addObservation(observationTime,"wind_ms",actWindMs,source)        
+        self.ws.addObservation(observationTime,"wind_knt",actWindKnt,source)        
+        self.ws.addObservation(observationTime,"wind_degrees",actWindDegrees,source)        
+        self.ws.addObservation(observationTime,"pressure_mb",actPressure,source)        
+        self.ws.addObservation(observationTime,"relative_humidity",actHumidity,source)        
+        #
+        # Get 5 day forecast
+        #
+        #r = requests.get("http://api.openweathermap.org/data/2.5/forecast?lat={}&lon={}&appid={}&units=metric".format(owmLongitude,owmLatitude,owmKey))
+        #actResponse = json.loads(r.text)
+        #print(json.dumps(actResponse,indent=4,sort_keys=True))
+        
     def refreshScheveningenActueel(self,dt):
         Logger.info("refreshScheveningenActueel: ")
         wuPars = {
         }
         wuKey = self.config.get('WeatherUnderground','key')
+        wuCountry = self.config.get('WeatherUnderground','country')
+        wuStation = self.config.get('WeatherUnderground','station')
         Logger.info("key: {}".format(wuKey))
-        r = requests.get("http://api.wunderground.com/api/{}/conditions/q/{}/The_Hague.json".format(wuKey,"NL"))
+        r = requests.get("http://api.wunderground.com/api/{}/conditions/q/{}/{}.json".format(wuKey,wuCountry,wuStation))
         actResponse = json.loads(r.text)
         print(json.dumps(actResponse,indent=4,sort_keys=True))
         actTempC = actResponse["current_observation"]["temp_c"]
@@ -81,18 +115,18 @@ class WeatherDataImport:
         actPressureMb = actResponse["current_observation"]["pressure_mb"]
         actRelativeHumidity = actResponse["current_observation"]["relative_humidity"]
         actVisibility = actResponse["current_observation"]["visibility_km"]
-        self.ws.addObservation(actObservationTime2,"temp_c",actTempC,"weatherunderground_the_hague")        
-        self.ws.addObservation(actObservationTime2,"dewpoint_c",actDewpointC,"weatherunderground_the_hague")        
-        self.ws.addObservation(actObservationTime2,"feelslike_c",actFeelslikeC,"weatherunderground_the_hague")        
-        self.ws.addObservation(actObservationTime2,"windchill_c",actWindchillC,"weatherunderground_the_hague")        
-        self.ws.addObservation(actObservationTime2,"wind_kph",actWindKph,"weatherunderground_the_hague")        
-        self.ws.addObservation(actObservationTime2,"wind_knt",actWindKnt,"weatherunderground_the_hague")        
-        self.ws.addObservation(actObservationTime2,"wind_gust_kph",actWindGustKph,"weatherunderground_the_hague")        
-        self.ws.addObservation(actObservationTime2,"wind_gust_knt",actWindGustKnt,"weatherunderground_the_hague")        
-        self.ws.addObservationString(actObservationTime2,"wind_dir",actWindDir,"weatherunderground_the_hague")        
-        self.ws.addObservation(actObservationTime2,"wind_degrees",actWindDegrees,"weatherunderground_the_hague")        
-        self.ws.addObservation(actObservationTime2,"precip_1hr_metric",actPrecipitation1hr,"weatherunderground_the_hague")        
-        self.ws.addObservation(actObservationTime2,"precip_today_metric",actPrecipitationToday,"weatherunderground_the_hague")        
-        self.ws.addObservation(actObservationTime2,"pressure_mb",actPressureMb,"weatherunderground_the_hague")        
-        self.ws.addObservation(actObservationTime2,"relative_humidity",actRelativeHumidity.strip('%'),"weatherunderground_the_hague")        
-        self.ws.addObservation(actObservationTime2,"visibility_km",actVisibility,"weatherunderground_the_hague")        
+        self.ws.addObservation(actObservationTime2,"temp_c",actTempC,"wu_the_hague")        
+        self.ws.addObservation(actObservationTime2,"dewpoint_c",actDewpointC,"wu_the_hague")        
+        self.ws.addObservation(actObservationTime2,"feelslike_c",actFeelslikeC,"wu_the_hague")        
+        self.ws.addObservation(actObservationTime2,"windchill_c",actWindchillC,"wu_the_hague")        
+        self.ws.addObservation(actObservationTime2,"wind_kph",actWindKph,"wu_the_hague")        
+        self.ws.addObservation(actObservationTime2,"wind_knt",actWindKnt,"wu_the_hague")        
+        self.ws.addObservation(actObservationTime2,"wind_gust_kph",actWindGustKph,"wu_the_hague")        
+        self.ws.addObservation(actObservationTime2,"wind_gust_knt",actWindGustKnt,"wu_the_hague")        
+        self.ws.addObservationString(actObservationTime2,"wind_dir",actWindDir,"wu_the_hague")        
+        self.ws.addObservation(actObservationTime2,"wind_degrees",actWindDegrees,"wu_the_hague")        
+        self.ws.addObservation(actObservationTime2,"precip_1hr_metric",actPrecipitation1hr,"wu_the_hague")        
+        self.ws.addObservation(actObservationTime2,"precip_today_metric",actPrecipitationToday,"wu_the_hague")        
+        self.ws.addObservation(actObservationTime2,"pressure_mb",actPressureMb,"wu_the_hague")        
+        self.ws.addObservation(actObservationTime2,"relative_humidity",actRelativeHumidity.strip('%'),"wu_the_hague")        
+        self.ws.addObservation(actObservationTime2,"visibility_km",actVisibility,"wu_the_hague")        
