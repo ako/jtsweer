@@ -55,8 +55,8 @@ class WeatherDataImport:
         Logger.info(dfTxt.getvalue())
         dfTxt.close()
 
-    def refreshOpenWeatherMap(self,dt):
-        Logger.info("refreshOpenWeatherMap")
+    def refreshOpenWeatherMapActueel(self,dt):
+        Logger.info("refreshOpenWeatherMapactueel")
         owmKey = self.config.get('OpenWeatherMap','key')
         owmLongitude = self.config.get('OpenWeatherMap','longitude')
         owmLatitude = self.config.get('OpenWeatherMap','latitude')
@@ -80,12 +80,18 @@ class WeatherDataImport:
         self.ws.addObservation(observationTime,"wind_degrees",actWindDegrees,source)        
         self.ws.addObservation(observationTime,"pressure_mb",actPressure,source)        
         self.ws.addObservation(observationTime,"relative_humidity",actHumidity,source)        
+
+    def refreshOpenWeatherMapForecast(self,dt):
+        Logger.info("refreshOpenWeatherMapForecast")
+        owmKey = self.config.get('OpenWeatherMap','key')
+        owmLongitude = self.config.get('OpenWeatherMap','longitude')
+        owmLatitude = self.config.get('OpenWeatherMap','latitude')
         #
         # Get 5 day forecast
         #
-        #r = requests.get("http://api.openweathermap.org/data/2.5/forecast?lat={}&lon={}&appid={}&units=metric".format(owmLongitude,owmLatitude,owmKey))
-        #actResponse = json.loads(r.text)
-        #print(json.dumps(actResponse,indent=4,sort_keys=True))
+        r = requests.get("http://api.openweathermap.org/data/2.5/forecast?lat={}&lon={}&appid={}&units=metric".format(owmLongitude,owmLatitude,owmKey))
+        actResponse = json.loads(r.text)
+        print(json.dumps(actResponse,indent=4,sort_keys=True))
         
     def refreshScheveningenActueel(self,dt):
         Logger.info("refreshScheveningenActueel: ")
